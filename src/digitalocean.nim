@@ -255,22 +255,22 @@ proc getImages*(url: string): Future[seq[Image]] {.async.} =
 proc getAllImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
   return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page}))
 
-proc getAllDistributionImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
+proc getDistributionImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
   return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "type": "distribution"}))
 
-proc getAllApplicationImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
+proc getApplicationImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
   return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "type": "application"}))
 
-proc getAllUserImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
+proc getUserImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
   return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "private": "true"}))
 
-proc getAllImagesByTag*(tag: string, page=1, per_page=100): Future[seq[Image]] {.async.} =
+proc getImagesByTag*(tag: string, page=1, per_page=100): Future[seq[Image]] {.async.} =
   return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "tag": tag}))
 
 
 ## SSH Keys
 
-proc getAllSSHKeys*(page=1, per_page=100): Future[seq[SSHKey]] {.async.} =
+proc getSSHKeys*(page=1, per_page=100): Future[seq[SSHKey]] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(encodeParams(

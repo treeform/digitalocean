@@ -1,4 +1,4 @@
-# DigitalOcean nim api wrapper
+# Wrapper for DigitalOcean HTTP API.
 
 Wraps many of the API endpoints that digital ocean has. If you need more of them wrapped feel free to open up an issue or add a pull request.
 
@@ -18,11 +18,11 @@ when they are not.
 
 ```nim
 var droplet = await createDroplet(
- name = "alpine1",
+ name = "example server",
  region = "sfo2",
  size = "s-1vcpu-1gb",
- image = 37823650,
- ssh_keys = @[10000],
+ image = 100001, # use getUserImages to get id
+ ssh_keys = @[10000], # use getSSHKeys to get id
  backups = false,
  ipv6 = false,
  private_networking = false,
