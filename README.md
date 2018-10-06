@@ -10,7 +10,7 @@ This library really worls well with [ssh](https://github.com/treeform/ssh) and I
 import digitalocean, ssh, print
 ```
 
-## Create a new droplet
+## Create a new Droplet
 
 I created this wrapper to manage servers based on demand.
 I use this to spin up servers when they are needed and spin them down
@@ -60,7 +60,7 @@ Then delete the droplet when I am done:
 await deleteDroplet(droplet.id)
 ```
 
-## Get all SSH keys
+## Get SSH Keys
 
 I highly recommend using SSH keys for everything, never use server passwords. You can list the keys and the IDs you need for droplet creation with this:
 
@@ -69,7 +69,7 @@ for key in await getAllSSHKeys():
  echo key.name, " ", key.id
 ```
 
-## Get all User images
+## Get Images
 
 I create an image that is a base setup for all my server. You can use the images you have from here. You need the `image.id` and `image.regions` to match when creating a droplet.
 
@@ -101,7 +101,7 @@ for droplet in await getDropletsByTag("gameserver"):
  print droplet.name
 ```
 
-## Get your account information
+## Get your Account Information
 
 You can get your account information.
 
