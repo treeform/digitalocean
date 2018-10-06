@@ -2,12 +2,17 @@
 
 Wraps many of the API endpoints that digital ocean has. If you need more of them wrapped feel free to open up an issue or add a pull request.
 
+DigitalOcean API docs Here: https://developers.digitalocean.com/documentation/v2/
+
 
 ## Imports
 This library really worls well with [ssh](https://github.com/treeform/ssh) and I also use [print](https://github.com/treeform/print).
-
 ```nim
 import digitalocean, ssh, print
+```
+Then you need to get your API token from your DigitalOcean account: https://cloud.digitalocean.com/account/api/tokens
+```nim
+setToken(token)
 ```
 
 ## Create a new Droplet
