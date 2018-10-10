@@ -88,7 +88,7 @@ type
 
 
 
-proc publicIp(droplet: Droplet): string =
+proc publicIp*(droplet: Droplet): string =
   ## Given a droplet finds its public v4 ip_address in networks object
   for net in droplet.networks.v4:
     if net.`type` == "public":
