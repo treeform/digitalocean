@@ -3,7 +3,6 @@
 # Wrapper for Digital Ocean HTTP Api.
 import httpclient, asyncnet, asyncdispatch, ospaths, uri, tables, strutils
 import json
-import print
 
 
 type
@@ -88,11 +87,20 @@ type
 
 
 
+proc ipv4(droplet: Droplet, networkType: string): string =
+  for net in droplet.networks.v4:
+    if net.`type` == networkType:
+      return net.ip_address
+
+
 proc publicIp*(droplet: Droplet): string =
   ## Given a droplet finds its public v4 ip_address in networks object
-  for net in droplet.networks.v4:
-    if net.`type` == "public":
-      return net.ip_address
+  droplet.ipv4("public")
+
+
+proc privateIp*(droplet: Droplet): string =
+  ## Given a droplet finds its private v4 ip_address in networks object
+  droplet.ipv4("private")
 
 
 const apiEndpoint = "https://api.digitalocean.com"
