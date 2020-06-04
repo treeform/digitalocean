@@ -97,6 +97,12 @@ type
     # flags*: int # An unsigned integer between 0-255 used for CAA records.
     # tag*: string # The parameter tag for CAA records. Valid values are "issue", "issuewild", or "iodef"
 
+  ResourceType* = enum
+    droplet
+    image
+    volume
+    volume_snapshot
+
 proc ipv4(droplet: Droplet, networkType: string): string =
   for net in droplet.networks.v4:
     if net.`type` == networkType:
@@ -342,3 +348,62 @@ proc deleteDomainRecord*(domainName: string, domainRecordId: int) {.async.} =
   let response = await client.request(apiEndpoint & "/v2/domains/" & domainName & "/records/" & $domainRecordId, httpMethod = HttpDelete)
   if response.status != "204 No Content":
     raise newException(DigitalOceanError, "Domain record was not deleted")
+
+## Tags
+
+proc `%`(t: tuple[resource_id: string, resource_type: ResourceType]): JsonNode =
+  %*{
+    "resource_id": t.resource_id,
+    "resource_type": $t.resource_type
+  }
+
+proc createTag*(tag: string) {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({
+    "Authorization": "Bearer " & globalToken,
+    "Content-Type": "application/json"
+  })
+  let bodyStr = $(%*{
+    "name": tag
+  })
+  let response = await client.post(apiEndpoint & "/v2/tags", body = bodyStr)
+  let json = parseJson(await response.body)
+  if "id" in json:
+    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+
+proc deleteTag*(tag: string) {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
+  let response = await client.request(apiEndpoint & "/v2/tags/" & tag, httpMethod = HttpDelete)
+  if response.status != "204 No Content":
+    raise newException(DigitalOceanError, "Domain record was not deleted")
+
+proc tagResources*(tag: string, resources: seq[tuple[resource_id: string, resource_type: ResourceType]]) {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({
+    "Authorization": "Bearer " & globalToken,
+    "Content-Type": "application/json"
+  })
+  let bodyStr = $(%*{
+    "resources": resources
+  })
+  let response = await client.post(apiEndpoint & "/v2/tags/" & tag & "/resources", body = bodyStr)
+  let rb = await response.body
+  if rb.len != 0:
+    let json = parseJson(rb)
+    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+
+proc untagResources*(tag: string, resources: seq[tuple[resource_id: string, resource_type: ResourceType]]) {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({
+    "Authorization": "Bearer " & globalToken,
+    "Content-Type": "application/json"
+  })
+  let bodyStr = $(%*{
+    "resources": resources
+  })
+  let response = await client.request(apiEndpoint & "/v2/tags/" & tag & "/resources", body = bodyStr, httpMethod = HttpDelete)
+  let rb = await response.body
+  if rb.len != 0:
+    let json = parseJson(rb)
+    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
