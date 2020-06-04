@@ -85,7 +85,17 @@ type
     public_key*: string # This attribute contains the entire public key string that was uploaded. This is what is embedded into the root user's authorized_keys file if you choose to include this SSH key during Droplet creation.
     name*: string # This is the human-readable display name for the given SSH key. This is used to easily identify the SSH keys when they are displayed.
 
-
+  DomainRecord* = ref object
+    id*: int # A unique identifier for each domain record.
+    `type`*: string # The type of the DNS record. For example: A, CNAME, TXT, ...
+    name*: string # The host name, alias, or service being defined by the record.
+    data*: string # Variable data depending on record type. For example, the "data" value for an A record would be the IPv4 address to which the domain will be mapped. For a CAA record, it would contain the domain name of the CA being granted permission to issue certificates.
+    # priority*: int # The priority for SRV and MX records.
+    # port*: int # The port for SRV records.
+    ttl*: int # This value is the time to live for the record, in seconds. This defines the time frame that clients can cache queried information before a refresh should be requested.
+    # weight*: int # The weight for SRV records.
+    # flags*: int # An unsigned integer between 0-255 used for CAA records.
+    # tag*: string # The parameter tag for CAA records. Valid values are "issue", "issuewild", or "iodef"
 
 proc ipv4(droplet: Droplet, networkType: string): string =
   for net in droplet.networks.v4:
@@ -289,4 +299,46 @@ proc getSSHKeys*(page=1, per_page=100): Future[seq[SSHKey]] {.async.} =
     keys.add(to(keysJson, SSHKey))
   return keys
 
+## Domain Records
 
+proc getAllDomainRecords*(domainName: string, page=1, per_page=100): Future[seq[DomainRecord]] {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
+  let response = await client.get(encodeParams(
+    apiEndpoint & "/v2/domains/" & domainName & "/records", {"page": $page, "per_page": $per_page}))
+  let json = parseJson(await response.body)
+  result = newSeq[DomainRecord]()
+  for j in json["domain_records"]:
+    result.add(to(j, DomainRecord))
+
+proc createDomainRecord*(
+  domainName: string,
+  kind: string,
+  name: string,
+  data: string,
+  ttl: int = 3600
+): Future[DomainRecord] {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({
+    "Authorization": "Bearer " & globalToken,
+    "Content-Type": "application/json"
+  })
+  let bodyStr = $(%*{
+    "name": name,
+    "type": kind,
+    "data": data,
+    "ttl": ttl
+  })
+  let response = await client.post(apiEndpoint & "/v2/domains/" & domainName & "/records", body = bodyStr)
+  let json = parseJson(await response.body)
+  if "id" in json:
+    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+  let j = json["domain_record"]
+  return to(j, DomainRecord)
+
+proc deleteDomainRecord*(domainName: string, domainRecordId: int) {.async.} =
+  let client = newAsyncHttpClient()
+  client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
+  let response = await client.request(apiEndpoint & "/v2/domains/" & domainName & "/records/" & $domainRecordId, httpMethod = HttpDelete)
+  if response.status != "204 No Content":
+    raise newException(DigitalOceanError, "Domain record was not deleted")
