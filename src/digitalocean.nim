@@ -1,9 +1,6 @@
-# digitalocean
-# Copyright treeform
 # Wrapper for Digital Ocean HTTP Api.
-import httpclient, asyncnet, asyncdispatch, ospaths, uri, tables, strutils
-import json
 
+import asyncdispatch, asyncnet, httpclient, json, ospaths, strutils, tables, uri
 
 type
   DigitalOceanError = object of Exception
@@ -13,7 +10,7 @@ type
     droplet_limit*: int # The total number of Droplets current user or team may have active at one time.
     floating_ip_limit*: int # The total number of Floating IPs the current user or team may have.
     email*: string # The email address used by the current user to registered for DigitalOcean.
-    uuid*: string # The unique universal identifier for the current user.
+    uuid*: string   # The unique universal identifier for the current user.
     email_verified*: bool # If true, the user has verified their account via email. False otherwise.
     status*: string # This value is one of "active", "warning" or "locked".
     status_message*: string # A human-readable message giving more details about the status of the account.
@@ -27,7 +24,7 @@ type
     completed_at*: string # A time value given in ISO8601 combined date and time format that represents when the action was completed.
     resource_id*: int # A unique identifier for the resource that the action is associated with.
     resource_type*: string # The type of resource that the action is associated with.
-    #region*: object # A full region object containing information about the region where the action occurred.
+                           #region*: object # A full region object containing information about the region where the action occurred.
     region_slug*: string # A slug representing the region where the action occurred.
 
   NetworkInterface = object
@@ -43,24 +40,24 @@ type
   Droplet* = ref object
     ## A Droplet is a DigitalOcean virtual machine.
     id*: int # A unique identifier for each Droplet instance. This is automatically generated upon Droplet creation.
-    name*: string # The human-readable name set for the Droplet instance.
-    memory*: int # Memory of the Droplet in megabytes.
-    vcpus*: int # The number of virtual CPUs.
-    disk*: int # The size of the Droplet's disk in gigabytes.
+    name*: string          # The human-readable name set for the Droplet instance.
+    memory*: int           # Memory of the Droplet in megabytes.
+    vcpus*: int            # The number of virtual CPUs.
+    disk*: int             # The size of the Droplet's disk in gigabytes.
     locked*: bool # A boolean value indicating whether the Droplet has been locked, preventing actions by users.
     created_at*: string # A time value given in ISO8601 combined date and time format that represents when the Droplet was created.
     status*: string # A status string indicating the state of the Droplet instance. This may be "new", "active", "off", or "archive".
     backup_ids*: seq[int] # An array of backup IDs of any backups that have been taken of the Droplet instance. Droplet backups are enabled at the time of the instance creation.
     snapshot_ids*: seq[int] # An array of snapshot IDs of any snapshots created from the Droplet instance.
     features*: seq[string] # An array of features enabled on this Droplet.
-    #region*: object # The region that the Droplet instance is deployed in. When setting a region, the value should be the slug identifier for the region. When you query a Droplet, the entire region object will be returned.
-    #image*: object # The base image used to create the Droplet instance. When setting an image, the value is set to the image id or slug. When querying the Droplet, the entire image object will be returned.
-    #size*: object # The current size object describing the Droplet. When setting a size, the value is set to the size slug. When querying the Droplet, the entire size object will be returned. Note that the disk volume of a Droplet may not match the size's disk due to Droplet resize actions. The disk attribute on the Droplet should always be referenced.
-    size_slug*: string # The unique slug identifier for the size of this Droplet.
+                           #region*: object # The region that the Droplet instance is deployed in. When setting a region, the value should be the slug identifier for the region. When you query a Droplet, the entire region object will be returned.
+                           #image*: object # The base image used to create the Droplet instance. When setting an image, the value is set to the image id or slug. When querying the Droplet, the entire image object will be returned.
+                           #size*: object # The current size object describing the Droplet. When setting a size, the value is set to the size slug. When querying the Droplet, the entire size object will be returned. Note that the disk volume of a Droplet may not match the size's disk due to Droplet resize actions. The disk attribute on the Droplet should always be referenced.
+    size_slug*: string     # The unique slug identifier for the size of this Droplet.
     networks*: Networks # The details of the network that are configured for the Droplet instance. This is an object that contains keys for IPv4 and IPv6. The value of each of these is an array that contains objects describing an individual IP resource allocated to the Droplet. These will define attributes like the IP address, netmask, and gateway of the specific network depending on the type of network it is.
-    #kernel*: object # The current kernel. This will initially be set to the kernel of the base image when the Droplet is created.
-    #next_backup_window*: object # The details of the Droplet's backups feature, if backups are configured for the Droplet. This object contains keys for the start and end times of the window during which the backup will start.
-    tags*: seq[string] # An array of Tags the Droplet has been tagged with.
+                        #kernel*: object # The current kernel. This will initially be set to the kernel of the base image when the Droplet is created.
+                        #next_backup_window*: object # The details of the Droplet's backups feature, if backups are configured for the Droplet. This object contains keys for the start and end times of the window during which the backup will start.
+    tags*: seq[string]     # An array of Tags the Droplet has been tagged with.
     volume_ids*: seq[string] # A flat array including the unique identifier for each Block Storage volume attached to the Droplet.
 
   Image* = ref object
@@ -74,7 +71,7 @@ type
     created_at*: string # A time value given in ISO8601 combined date and time format that represents when the image was created.
     min_disk_size*: int # The minimum disk size in GB required for a Droplet to use this image.
     size_gigabytes*: float # The size of the image in gigabytes.
-    description*: string # An optional free-form text field to describe an image.
+    description*: string   # An optional free-form text field to describe an image.
     tags*: seq[string] # An array containing the names of the tags the image has been tagged with.
     status*: string # A status string indicating the state of a custom image. This may be "NEW", "available", "pending", or "deleted".
     error_message*: string # A string containing information about errors that may occur when importing a custom image.
@@ -86,16 +83,16 @@ type
     name*: string # This is the human-readable display name for the given SSH key. This is used to easily identify the SSH keys when they are displayed.
 
   DomainRecord* = ref object
-    id*: int # A unique identifier for each domain record.
+    id*: int        # A unique identifier for each domain record.
     `type`*: string # The type of the DNS record. For example: A, CNAME, TXT, ...
-    name*: string # The host name, alias, or service being defined by the record.
+    name*: string   # The host name, alias, or service being defined by the record.
     data*: string # Variable data depending on record type. For example, the "data" value for an A record would be the IPv4 address to which the domain will be mapped. For a CAA record, it would contain the domain name of the CA being granted permission to issue certificates.
-    # priority*: int # The priority for SRV and MX records.
-    # port*: int # The port for SRV records.
+                    # priority*: int # The priority for SRV and MX records.
+                    # port*: int # The port for SRV records.
     ttl*: int # This value is the time to live for the record, in seconds. This defines the time frame that clients can cache queried information before a refresh should be requested.
-    # weight*: int # The weight for SRV records.
-    # flags*: int # An unsigned integer between 0-255 used for CAA records.
-    # tag*: string # The parameter tag for CAA records. Valid values are "issue", "issuewild", or "iodef"
+                    # weight*: int # The weight for SRV records.
+                    # flags*: int # An unsigned integer between 0-255 used for CAA records.
+              # tag*: string # The parameter tag for CAA records. Valid values are "issue", "issuewild", or "iodef"
 
   ResourceType* = enum
     droplet
@@ -103,25 +100,28 @@ type
     volume
     volume_snapshot
 
+proc checkForError(json: JsonNode) =
+  if "id" in json and "message" in json:
+    raise newException(
+      DigitalOceanError,
+      json["id"].getStr() & ": " & json["message"].getStr()
+    )
+
 proc ipv4(droplet: Droplet, networkType: string): string =
   for net in droplet.networks.v4:
     if net.`type` == networkType:
       return net.ip_address
 
-
 proc publicIp*(droplet: Droplet): string =
   ## Given a droplet finds its public v4 ip_address in networks object
   droplet.ipv4("public")
-
 
 proc privateIp*(droplet: Droplet): string =
   ## Given a droplet finds its private v4 ip_address in networks object
   droplet.ipv4("private")
 
-
 const apiEndpoint = "https://api.digitalocean.com"
 var globalToken: string
-
 
 proc encodePostBody(params: openarray[(string, string)]): string =
   var parts = newSeq[string]()
@@ -129,21 +129,17 @@ proc encodePostBody(params: openarray[(string, string)]): string =
     parts.add(encodeUrl(pair[0]) & "=" & encodeUrl(pair[1]))
   parts.join("&")
 
-
 proc encodeParams(url: string, params: openarray[(string, string)]): string =
   url & "?" & encodePostBody(params)
 
-
 proc setToken*(token: string) =
   globalToken = token
-
 
 proc getAccount*(): Future[Account] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(apiEndpoint & "/v2/account")
   return to(parseJson(await response.body)["account"], Account)
-
 
 proc getAllActions*(): Future[seq[Action]] {.async.} =
   let client = newAsyncHttpClient()
@@ -155,17 +151,15 @@ proc getAllActions*(): Future[seq[Action]] {.async.} =
     actions.add(to(accountJson, Action))
   return actions
 
-
 proc getAction*(actionId: int): Future[Action] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(apiEndpoint & "/v2/actions/" & $actionId)
   return to(parseJson(await response.body)["action"], Action)
 
-
 ## Droplets
 
-proc getAllDroplets*(page=1, per_page=100): Future[seq[Droplet]] {.async.} =
+proc getAllDroplets*(page = 1, per_page = 100): Future[seq[Droplet]] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(encodeParams(
@@ -176,18 +170,19 @@ proc getAllDroplets*(page=1, per_page=100): Future[seq[Droplet]] {.async.} =
     droplets.add(to(dropletJson, Droplet))
   return droplets
 
-
-proc getDropletsByTag*(tag: string, page=1, per_page=100): Future[seq[Droplet]] {.async.} =
+proc getDropletsByTag*(tag: string, page = 1, per_page = 100): Future[seq[
+    Droplet]] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(encodeParams(
-    apiEndpoint & "/v2/droplets", {"page": $page, "per_page": $per_page, "tag_name": tag}))
+    apiEndpoint & "/v2/droplets",
+    {"page": $page, "per_page": $per_page, "tag_name": tag
+  }))
   let json = parseJson(await response.body)
   var droplets = newSeq[Droplet]()
   for dropletJson in json["droplets"]:
     droplets.add(to(dropletJson, Droplet))
   return droplets
-
 
 proc getDroplet*(dropletId: int): Future[Droplet] {.async.} =
   let client = newAsyncHttpClient()
@@ -250,17 +245,16 @@ proc createDroplet*(
   })
   let response = await client.post(apiEndpoint & "/v2/droplets", body = bodyStr)
   let json = parseJson(await response.body)
-  if "id" in json:
-    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+  checkForError(json)
   let droplets = newSeq[Droplet]()
   let dropletJson = json["droplet"]
   return to(dropletJson, Droplet)
 
-
 proc deleteDroplet*(dropletId: int) {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
-  let response = await client.request(apiEndpoint & "/v2/droplets/" & $dropletId, httpMethod = HttpDelete)
+  let response = await client.request(
+    apiEndpoint & "/v2/droplets/" & $dropletId, httpMethod = HttpDelete)
   if response.status != "204 No Content":
     raise newException(DigitalOceanError, "Droplet was not deleted")
 
@@ -276,25 +270,30 @@ proc getImages*(url: string): Future[seq[Image]] {.async.} =
     images.add(to(dropletJson, Image))
   return images
 
-proc getAllImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
-  return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page}))
+proc getAllImages*(page = 1, per_page = 100): Future[seq[Image]] {.async.} =
+  return await getImages(encodeParams(
+    apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page}))
 
-proc getDistributionImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
-  return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "type": "distribution"}))
+proc getDistributionImages*(page = 1, per_page = 100): Future[seq[Image]] {.async.} =
+  return await getImages(encodeParams(apiEndpoint & "/v2/images", {
+      "page": $page, "per_page": $per_page, "type": "distribution"}))
 
-proc getApplicationImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
-  return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "type": "application"}))
+proc getApplicationImages*(page = 1, per_page = 100): Future[seq[Image]] {.async.} =
+  return await getImages(encodeParams(apiEndpoint & "/v2/images", {
+      "page": $page, "per_page": $per_page, "type": "application"}))
 
-proc getUserImages*(page=1, per_page=100): Future[seq[Image]] {.async.} =
-  return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "private": "true"}))
+proc getUserImages*(page = 1, per_page = 100): Future[seq[Image]] {.async.} =
+  return await getImages(encodeParams(apiEndpoint & "/v2/images", {
+      "page": $page, "per_page": $per_page, "private": "true"}))
 
-proc getImagesByTag*(tag: string, page=1, per_page=100): Future[seq[Image]] {.async.} =
-  return await getImages(encodeParams(apiEndpoint & "/v2/images", {"page": $page, "per_page": $per_page, "tag": tag}))
-
+proc getImagesByTag*(tag: string, page = 1, per_page = 100): Future[seq[
+    Image]] {.async.} =
+  return await getImages(encodeParams(apiEndpoint & "/v2/images", {
+      "page": $page, "per_page": $per_page, "tag": tag}))
 
 ## SSH Keys
 
-proc getSSHKeys*(page=1, per_page=100): Future[seq[SSHKey]] {.async.} =
+proc getSSHKeys*(page = 1, per_page = 100): Future[seq[SSHKey]] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(encodeParams(
@@ -307,11 +306,17 @@ proc getSSHKeys*(page=1, per_page=100): Future[seq[SSHKey]] {.async.} =
 
 ## Domain Records
 
-proc getAllDomainRecords*(domainName: string, page=1, per_page=100): Future[seq[DomainRecord]] {.async.} =
+proc getAllDomainRecords*(
+  domainName: string,
+  page = 1,
+  per_page = 100
+): Future[seq[DomainRecord]] {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
   let response = await client.get(encodeParams(
-    apiEndpoint & "/v2/domains/" & domainName & "/records", {"page": $page, "per_page": $per_page}))
+    apiEndpoint & "/v2/domains/" & domainName & "/records",
+    {"page": $page, "per_page": $per_page}
+  ))
   let json = parseJson(await response.body)
   result = newSeq[DomainRecord]()
   for j in json["domain_records"]:
@@ -335,17 +340,22 @@ proc createDomainRecord*(
     "data": data,
     "ttl": ttl
   })
-  let response = await client.post(apiEndpoint & "/v2/domains/" & domainName & "/records", body = bodyStr)
+  let response = await client.post(
+    apiEndpoint & "/v2/domains/" & domainName & "/records",
+    body = bodyStr
+  )
   let json = parseJson(await response.body)
-  if "id" in json:
-    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+  checkForError(json)
   let j = json["domain_record"]
   return to(j, DomainRecord)
 
 proc deleteDomainRecord*(domainName: string, domainRecordId: int) {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
-  let response = await client.request(apiEndpoint & "/v2/domains/" & domainName & "/records/" & $domainRecordId, httpMethod = HttpDelete)
+  let response = await client.request(
+    apiEndpoint & "/v2/domains/" & domainName & "/records/" & $domainRecordId,
+    httpMethod = HttpDelete
+  )
   if response.status != "204 No Content":
     raise newException(DigitalOceanError, "Domain record was not deleted")
 
@@ -368,17 +378,22 @@ proc createTag*(tag: string) {.async.} =
   })
   let response = await client.post(apiEndpoint & "/v2/tags", body = bodyStr)
   let json = parseJson(await response.body)
-  if "id" in json:
-    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+  checkForError(json)
 
 proc deleteTag*(tag: string) {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({"Authorization": "Bearer " & globalToken})
-  let response = await client.request(apiEndpoint & "/v2/tags/" & tag, httpMethod = HttpDelete)
+  let response = await client.request(
+    apiEndpoint & "/v2/tags/" & tag,
+    httpMethod = HttpDelete
+  )
   if response.status != "204 No Content":
     raise newException(DigitalOceanError, "Domain record was not deleted")
 
-proc tagResources*(tag: string, resources: seq[tuple[resource_id: string, resource_type: ResourceType]]) {.async.} =
+proc tagResources*(
+  tag: string,
+  resources: seq[tuple[resource_id: string, resource_type: ResourceType]]
+) {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({
     "Authorization": "Bearer " & globalToken,
@@ -387,13 +402,17 @@ proc tagResources*(tag: string, resources: seq[tuple[resource_id: string, resour
   let bodyStr = $(%*{
     "resources": resources
   })
-  let response = await client.post(apiEndpoint & "/v2/tags/" & tag & "/resources", body = bodyStr)
+  let response = await client.post(
+    apiEndpoint & "/v2/tags/" & tag & "/resources",
+    body = bodyStr
+  )
   let rb = await response.body
   if rb.len != 0:
     let json = parseJson(rb)
-    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+    checkForError(json)
 
-proc untagResources*(tag: string, resources: seq[tuple[resource_id: string, resource_type: ResourceType]]) {.async.} =
+proc untagResources*(tag: string, resources: seq[tuple[resource_id: string,
+    resource_type: ResourceType]]) {.async.} =
   let client = newAsyncHttpClient()
   client.headers = newHttpHeaders({
     "Authorization": "Bearer " & globalToken,
@@ -402,8 +421,12 @@ proc untagResources*(tag: string, resources: seq[tuple[resource_id: string, reso
   let bodyStr = $(%*{
     "resources": resources
   })
-  let response = await client.request(apiEndpoint & "/v2/tags/" & tag & "/resources", body = bodyStr, httpMethod = HttpDelete)
+  let response = await client.request(
+    apiEndpoint & "/v2/tags/" & tag & "/resources",
+    body = bodyStr,
+    httpMethod = HttpDelete
+  )
   let rb = await response.body
   if rb.len != 0:
     let json = parseJson(rb)
-    raise newException(DigitalOceanError, json["id"].getStr() & ": " & json["message"].getStr())
+    checkForError(json)

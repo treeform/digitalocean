@@ -70,8 +70,8 @@ await deleteDroplet(droplet.id)
 I highly recommend using SSH keys for everything, never use server passwords. You can list the keys and the IDs you need for droplet creation with this:
 
 ```nim
-for key in await getAllSSHKeys():
- echo key.name, " ", key.id
+  for key in waitFor getSSHKeys():
+    echo (key.name, key.id)
 ```
 
 ## Get Images
@@ -79,15 +79,15 @@ for key in await getAllSSHKeys():
 I create an image that is a base setup for all my server. You can use the images you have from here. You need the `image.id` and `image.regions` to match when creating a droplet.
 
 ```
-for image in await getAllUserImages():
- print image.name, image.id, image.slug, image.regions
+  for image in waitFor getUserImages():
+    echo (image.name, image.id, image.slug, image.regions)
 ```
 
 You can also list public images which there are many of:
 
 ```
-for image in await getAllImages():
- print image.name, image.id, image.slug, image.regions
+  for image in waitFor getAllImages():
+    echo (image.name, image.id, image.slug)
 ```
 
 ## Get Droplets
@@ -95,15 +95,15 @@ for image in await getAllImages():
 You can see all the droplets you have here:
 
 ```nim
-for droplet in await getDropletsByTag("gameserver"):
- print droplet.name
+  for droplet in waitFor getAllDroplets():
+    echo droplet.name
 ```
 
 But I think it’s more useful to tag your droplets and look at the by tag. Once you have many droplets the list becomes cluttered.
 
 ```nim
-for droplet in await getDropletsByTag("gameserver"):
- print droplet.name
+  for droplet in waitFor getDropletsByTag("gameserver"):
+    echo droplet.name
 ```
 
 ## Get your Account Information
@@ -111,16 +111,12 @@ for droplet in await getDropletsByTag("gameserver"):
 You can get your account information.
 
 ```nim
-print await getAccount()
+  echo (waitFor getAccount()).email
 ```
 
 You can also get recent actions that happened like which servers got started or stopped:
 
 ```nim
-for action in await getAllActions():
- print action.`type`
+  for action in waitFor getAllActions():
+    echo action.`type`
 ```
-
-
-
-
