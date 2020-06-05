@@ -61,7 +61,7 @@ server.exit()
 
 Then delete the droplet when I am done:
 
-```
+```nim
 await deleteDroplet(droplet.id)
 ```
 
@@ -78,14 +78,14 @@ I highly recommend using SSH keys for everything, never use server passwords. Yo
 
 I create an image that is a base setup for all my server. You can use the images you have from here. You need the `image.id` and `image.regions` to match when creating a droplet.
 
-```
+```nim
   for image in waitFor getUserImages():
     echo (image.name, image.id, image.slug, image.regions)
 ```
 
 You can also list public images which there are many of:
 
-```
+```nim
   for image in waitFor getAllImages():
     echo (image.name, image.id, image.slug)
 ```
