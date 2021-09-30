@@ -1,5 +1,15 @@
 # Wrapper for DigitalOcean HTTP API.
 
+`nimble install digitalocean`
+
+![Github Actions](https://github.com/treeform/digitalocean/workflows/Github%20Actions/badge.svg)
+
+[API reference](https://nimdocs.com/treeform/digitalocean)
+
+This library has no dependencies other than the Nim standard libarary.
+
+## About
+
 Wraps many of the API endpoints that digital ocean has. If you need more of them wrapped feel free to open up an issue or add a pull request.
 
 DigitalOcean API docs Here: https://developers.digitalocean.com/documentation/v2/
